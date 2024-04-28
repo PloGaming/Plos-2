@@ -13,9 +13,9 @@ EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -g -ggdb
-CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude
-LDFLAGS:=$(LDFLAGS)
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -g
+CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude -g
+LDFLAGS:=$(LDFLAGS) 
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 ARCHDIR=arch/$(HOSTARCH)
@@ -53,8 +53,8 @@ $(ARCHDIR)/crtn.o \
 all: plos.kernel
 
 plos.kernel: $(OBJS) $(ARCHDIR)/linker.ld
-	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	grub-file --is-x86-multiboot plos.kernel
+	$(CC) -n -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
+	grub-file --is-x86-multiboot2 plos.kernel
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
@@ -66,8 +66,8 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 .asm.o:
-	$(AS) -M -MF $(subst .asm,.d,$<) -felf32 $< -o $@
-	$(AS) -felf32 $< -o $@
+	$(AS) -M -MF $(subst .asm,.d,$<) $(NASMFLAGS) $< -o $@
+	$(AS) $(NASMFLAGS) $< -o $@
 
 clean:
 	rm -f plos.kernel

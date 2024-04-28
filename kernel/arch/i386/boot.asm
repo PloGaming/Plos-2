@@ -4,21 +4,11 @@
 ; Source info: https://www.gnu.org/software/grub/manual/multiboot/multiboot.html
 ; ---------------------------
 
-; GRUB Multiboot header constants
-; --- This number identifies the grub multiboot 
-MAGIC_NUMBER    equ     0x1BADB002
-; --- The first bit of the flag member, it indicates
-; --- that all boot modules will be aligned on 4KB 
-ALIGN_MOD       equ     1 << 0
-; --- The second bit of the flag member, it indicates
-; --- to GRUB that we accept the memory map
-MEMORY_INFO     equ     1 << 1
-; --- Request GRUB to provide me a framebuffer
-FRAMEBUFFER		equ		0x00
-; --- The actual flag member
-MULTIBOOT_FLAGS equ     ALIGN_MOD | MEMORY_INFO | FRAMEBUFFER
-; --- Checksum for GRUB to verify
-CHECKSUM        equ     -(MAGIC_NUMBER + MULTIBOOT_FLAGS)
+; GRUB Multiboot2 header constants
+; --- This number identifies the GRUB multiboot2
+MAGIC_NUMBER    equ     0xE85250D6
+; --- 0 = 32 bit i386, 4 = 32 bit MIPS
+ARCHITECTURE	equ		0
 
 
 ; GDT 32/64 bit constants (for a flat memory model)
@@ -56,18 +46,23 @@ KERNEL_DATA_ACC equ 	(PRESENT << 7) | (KERNEL_DPL << 5) | (NONSYSTEM_DESC << 4) 
 USER_CODE_ACC	equ		(PRESENT << 7) | (USER_DPL << 5) | (NONSYSTEM_DESC << 4) | (EXECUTABLE << 3) | (CODE_DC << 2) | (CODE_READ << 1)
 USER_DATA_ACC 	equ 	(PRESENT << 7) | (USER_DPL << 5) | (NONSYSTEM_DESC << 4) | (CODE_DC << 2) | (DATA_WRITE << 1)
 
-
 ; Start of the .multiboot section
 ; This will be relocated by the linker script
 ; It must be aligned to 32-bit boundary and it must be
 ; in the first 8192 bytes of the OS image
 	section .multiboot
 
-	align 4 ; alignment on 4 bytes (32 bit)
+	align 8 ; alignment on 8 bytes (64 bit)
 
+multiboot_header:
 	dd  MAGIC_NUMBER
-	dd	MULTIBOOT_FLAGS
-	dd	CHECKSUM
+	dd	ARCHITECTURE
+	dd	multiboot_header_end - multiboot_header
+	dd -(MAGIC_NUMBER + ARCHITECTURE + (multiboot_header_end - multiboot_header))
+	dw 0
+	dw 0
+	dd 8
+multiboot_header_end:
 
 
 ; Start of .bss section
@@ -77,7 +72,7 @@ USER_DATA_ACC 	equ 	(PRESENT << 7) | (USER_DPL << 5) | (NONSYSTEM_DESC << 4) | (
 ; We define it in it's own section (marked as nobits)
 	section .bss
 
-	; System V ABI specified that stack must be aligned on 2 byte
+	; System V ABI specified that stack must be aligned on 2 bytes
 	align 2 
 
 stack_bottom:
@@ -131,18 +126,23 @@ _start:
 	push 0x00
 	popfd
 
+	; Calling the global contructors
+	extern _init
+	call _init
+
 	; EBX contains the base address of the multiboot address
 	push ebx
 	; EAX contains the magic number to validate the GRUB multiboot boot
 	push eax 
 
-	extern _init
-	call _init
-
 	; Calling the high-level kernel function (writte in C)
 	; The stack is aligned so the call won't have any problems
 	extern kernel_main
 	call kernel_main
+
+	; Calling the global destructors
+	extern _fini
+	call _fini
 
 	; After the return we put the CPU in an infinite loop
 	; 1) Disable interrupts

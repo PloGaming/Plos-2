@@ -22,7 +22,7 @@ ARCHDIR=arch/$(HOSTARCH)
  
 include $(ARCHDIR)/make.config
  
-CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS) -g -ggdb
+CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS) -g
 CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
 LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
@@ -66,8 +66,8 @@ libk.a: $(LIBK_OBJS)
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
  
 .asm.o:
-	$(AS) -M -MF $(subst .asm,.d,$<) -felf32 $< -o $@
-	$(AS) -felf32 $< -o $@
+	$(AS) -M -MF $(subst .asm,.d,$<) $< -o $@
+	$(AS) $< -o $@
  
 .c.libk.o:
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)

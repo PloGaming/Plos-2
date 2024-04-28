@@ -5,6 +5,11 @@
         "stddef.h": "c",
         "cstdint": "c",
         "stdint.h": "c",
-        "stdint-gcc.h": "c"
-    }
+        "stdint-gcc.h": "c",
+        "vga.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "multiboot2.h": "c"
+    },
+    "C_Cpp.dimInactiveRegions": false
 }

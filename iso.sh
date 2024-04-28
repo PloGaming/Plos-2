@@ -9,7 +9,7 @@ mkdir -p isodir/boot/grub
 cp sysroot/boot/plos.kernel isodir/boot/plos.kernel
 cat > isodir/boot/grub/grub.cfg << EOF
 menuentry "plos" {
-	multiboot /boot/plos.kernel
+	multiboot2 /boot/plos.kernel
 }
 EOF
 grub-mkrescue -o plos.iso isodir
