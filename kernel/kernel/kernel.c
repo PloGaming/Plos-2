@@ -20,8 +20,7 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 
 	// Parsing the multiboot info structure
 	struct multiboot_tag *ctrTag;
-	int numTags = 0;
-	for(ctrTag = (struct multiboot_tag *)(uint8_t *)boot_information + 8; 
+	for(ctrTag = (struct multiboot_tag *)((uint8_t *)boot_information + MULTIBOOT_TAG_ALIGN); 
 		ctrTag->type != MULTIBOOT_TAG_TYPE_END; 
 		ctrTag = (struct multiboot_tag *)((uint8_t *)ctrTag + ((ctrTag->size + 7) & ~7)))
 		{
@@ -45,12 +44,31 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 						memoryMap = (struct multiboot_mmap_entry *)((uint8_t *)memoryMap + ((struct multiboot_tag_mmap *)ctrTag)->entry_size))
 						{
 							printf (" base_addr = 0x%x%x,"
-						" length = 0x%x%x, type = 0x%x\n",
-						(uint32_t) (memoryMap->addr >> 32),
-						(uint32_t) (memoryMap->addr & 0xffffffff),
-						(uint32_t) (memoryMap->len >> 32),
-						(uint32_t) (memoryMap->len & 0xffffffff),
-						(uint32_t) memoryMap->type);
+								" length = 0x%x%x bytes;",
+								(uint32_t) (memoryMap->addr >> 32),
+								(uint32_t) (memoryMap->addr & 0xffffffff),
+								(uint32_t) (memoryMap->len >> 32),
+								(uint32_t) (memoryMap->len & 0xffffffff));
+
+							switch((uint32_t)memoryMap->type)
+							{
+								case MULTIBOOT_MEMORY_AVAILABLE:
+									printf(" free memory");
+									break;
+								case MULTIBOOT_MEMORY_ACPI_RECLAIMABLE:
+									printf(" ACPI information");
+									break;
+								case MULTIBOOT_MEMORY_BADRAM:
+									printf(" bad RAM");
+									break;
+								case MULTIBOOT_MEMORY_NVS:
+									printf(" memory preserved for hibernation");
+									break;
+								case MULTIBOOT_MEMORY_RESERVED:
+									printf(" reserved memory");
+									break;
+							}
+							putchar('\n');
 						}
 					break;
 				case MULTIBOOT_TAG_TYPE_VBE:
@@ -96,13 +114,12 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 				case MULTIBOOT_TAG_TYPE_ELF_SECTIONS:
 				case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
 				case MULTIBOOT_TAG_TYPE_APM:
+				case MULTIBOOT_TAG_TYPE_BOOTDEV:
 					printf("multiboot useless TAG type: %lu\n", ctrTag->type);
 					break;
 				default:
 					printf("multiboot unrecognized TAG type: %lu\n", ctrTag->type);
 					break;
 			}
-			numTags++;
 		}
-		printf("Num of tags: %d\n", numTags);
 }
