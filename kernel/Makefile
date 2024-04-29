@@ -32,6 +32,8 @@ $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
 graphics/framebuffer.o \
 graphics/vga.o \
+graphics/terminal.o \
+
 
 OBJS=\
 $(ARCHDIR)/crti.o \

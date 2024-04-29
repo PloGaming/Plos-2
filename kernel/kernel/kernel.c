@@ -2,15 +2,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <graphics/vga.h>
+#include <graphics/terminal.h>
 #include <graphics/framebuffer.h>
 #include <kernel/multiboot2.h>
 
 void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information) 
 {
-	// Initialize the VGA output
-	vga_terminal_initialize();
-
 	// Check for being boooted by the GRUB bootloader with multiboot2
 	if (magicNumber != MULTIBOOT2_BOOTLOADER_MAGIC)
     {
@@ -18,8 +15,23 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 		return;
     }
 
-	// Parsing the multiboot info structure
+	// Initialize the VGA output
 	struct multiboot_tag *ctrTag;
+	for(ctrTag = (struct multiboot_tag *)((uint8_t *)boot_information + MULTIBOOT_TAG_ALIGN); 
+		ctrTag->type != MULTIBOOT_TAG_TYPE_END; 
+		ctrTag = (struct multiboot_tag *)((uint8_t *)ctrTag + ((ctrTag->size + 7) & ~7)))
+		{
+			if(ctrTag->type == MULTIBOOT_TAG_TYPE_FRAMEBUFFER)
+			{
+				terminal_initialize((struct multiboot_tag_framebuffer *)ctrTag);
+			}
+		}
+
+	struct multiboot_tag_basic_meminfo *basicMemInfo;
+	struct multiboot_mmap_entry *memoryMap;
+	struct multiboot_tag_framebuffer *framebufferInfo;
+
+	// Parsing the multiboot info structure
 	for(ctrTag = (struct multiboot_tag *)((uint8_t *)boot_information + MULTIBOOT_TAG_ALIGN); 
 		ctrTag->type != MULTIBOOT_TAG_TYPE_END; 
 		ctrTag = (struct multiboot_tag *)((uint8_t *)ctrTag + ((ctrTag->size + 7) & ~7)))
@@ -27,17 +39,15 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 			switch(ctrTag->type)
 			{
 				case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-					struct multiboot_tag_basic_meminfo *basicMemInfo = (struct multiboot_tag_basic_meminfo *)ctrTag; 
+					basicMemInfo = (struct multiboot_tag_basic_meminfo *)ctrTag; 
 
 					printf("MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:\n");
 					printf ("mem_lower = %uKB, mem_upper = %uKB\n",
                   		basicMemInfo->mem_lower,
                   		basicMemInfo->mem_upper);
-
 					break;
+
 				case MULTIBOOT_TAG_TYPE_MMAP:
-					struct multiboot_mmap_entry *memoryMap;
-					
 					printf("MULTIBOOT_TAG_TYPE_MMAP:\n");
 					for(memoryMap = ((struct multiboot_tag_mmap *)ctrTag)->entries; 
 						(uint8_t *)memoryMap < (uint8_t *)ctrTag + ctrTag->size; 
@@ -71,34 +81,18 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 							putchar('\n');
 						}
 					break;
-				case MULTIBOOT_TAG_TYPE_VBE:
-					struct multiboot_tag_vbe *vbeInfo = (struct multiboot_tag_vbe * )ctrTag;
 
-					printf("MULTIBOOT_TAG_TYPE_VBE:\n");
-					printf("Current video type: %hu\n", vbeInfo->vbe_mode);
-					break;
 				case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
-					struct multiboot_tag_framebuffer *framebufferInfo = (struct multiboot_tag_framebuffer *) ctrTag;
+					framebufferInfo = (struct multiboot_tag_framebuffer *) ctrTag;
 
 					printf("MULTIBOOT_TAG_TYPE_FRAMEBUFFER:\n");
 					printf("Framebuffer addr: 0x%x%x\n", 
 						(uint32_t)(framebufferInfo->common.framebuffer_addr >> 32),
 						(uint32_t)(framebufferInfo->common.framebuffer_addr & 0xffffffff));
 					printf("Graphics mode: %u\n", framebufferInfo->common.framebuffer_type);
-					printf("Height: %lu; Width: %lu\n", framebufferInfo->common.framebuffer_height, framebufferInfo->common.framebuffer_width);
-
-					switch(framebufferInfo->common.framebuffer_type)
-					{
-						case MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED:
-							break;
-						case MULTIBOOT_FRAMEBUFFER_TYPE_RGB:
-							break;
-						case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:		
-							break;
-						default:
-							break;
-					}
+					printf("Height: %u; Width: %u\n", framebufferInfo->common.framebuffer_height, framebufferInfo->common.framebuffer_width);
 					break;
+
 				case MULTIBOOT_TAG_TYPE_EFI32:
 				case MULTIBOOT_TAG_TYPE_EFI64:
 				case MULTIBOOT_TAG_TYPE_SMBIOS:
@@ -115,10 +109,12 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 				case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
 				case MULTIBOOT_TAG_TYPE_APM:
 				case MULTIBOOT_TAG_TYPE_BOOTDEV:
-					printf("multiboot useless TAG type: %lu\n", ctrTag->type);
+				case MULTIBOOT_TAG_TYPE_VBE:
+					printf("multiboot useless TAG type: %u\n", ctrTag->type);
 					break;
+
 				default:
-					printf("multiboot unrecognized TAG type: %lu\n", ctrTag->type);
+					printf("multiboot unrecognized TAG type: %u\n", ctrTag->type);
 					break;
 			}
 		}

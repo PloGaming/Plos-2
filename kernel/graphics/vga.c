@@ -6,66 +6,42 @@
 #include <graphics/vga.h>
 
 uint16_t currX, currY;
-enum video_type currentVideoType;
- 
-static enum video_type get_bios_area_video_type(void)
-{
-    return (enum video_type) ((*(const uint16_t*) VGA_VIDEO_MEMORY_DETECT_TYPE) & 0x30);
-}
 
-void vga_terminal_initialize(void)
+static uint16_t *vga_video_mem = (uint16_t *) NULL;
+static uint32_t vga_height = 0;
+static uint32_t vga_width = 0;
+
+void vga_terminal_initialize(uint16_t *video_mem, uint32_t height, uint32_t width)
 {
     uint16_t *i;
     currX = currY = 0;
-    currentVideoType = get_bios_area_video_type();
+
+    if(!video_mem || height <= 0 || width <= 0)
+        return;
+
+    vga_video_mem = video_mem;
+    vga_height = height;
+    vga_width = width;
 
     // Clearing the screen
-    switch (currentVideoType)
+    for(i = vga_video_mem; i < video_mem + vga_height * vga_width; i++)
     {
-        case VIDEO_TYPE_NONE:
-        case VIDEO_TYPE_COLOUR:
-            for(i = (uint16_t *)VGA_VIDEO_MEMORY_COLOR; i < (uint16_t *)VGA_VIDEO_MEMORY_COLOR + VGA_COLS * VGA_ROWS; i++)
-            {
-                *i = ' ' | (FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLUE) << 8);
-            }
-            break;
-        case VIDEO_TYPE_MONOCHROME:
-            for(i = (uint16_t *)VGA_VIDEO_MEMORY_MONOCHROME; i < (uint16_t *)VGA_VIDEO_MEMORY_MONOCHROME + VGA_COLS * VGA_ROWS; i++)
-            {
-                *i = ' ' | (FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLACK) << 8);
-            }
-            break;
+        *i = ' ' | (TEXT_COLOR << 8);
     }
 }
 
 static void goOneLineDown(void)
 {
     uint16_t *i;
-    if(currY == VGA_ROWS-1)
+    if(currY == vga_height-1)
     {
-        switch (currentVideoType)
+        for(i = vga_video_mem; i < vga_video_mem + vga_width * (vga_height-1); i++)
         {
-            case VIDEO_TYPE_NONE:
-            case VIDEO_TYPE_COLOUR:
-                for(i = (uint16_t *)VGA_VIDEO_MEMORY_COLOR; i < (uint16_t *)VGA_VIDEO_MEMORY_COLOR + VGA_COLS * (VGA_ROWS-1); i++)
-                {
-                    *i = *(i + VGA_COLS);
-                }
-                for(; i < (uint16_t *) VGA_VIDEO_MEMORY_COLOR + (VGA_COLS * VGA_ROWS); i++)
-                {
-                    *i = ' ' | (FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLUE) << 8);
-                }
-                break;
-            case VIDEO_TYPE_MONOCHROME:
-                for(i = (uint16_t *)VGA_VIDEO_MEMORY_MONOCHROME; i < (uint16_t *)VGA_VIDEO_MEMORY_MONOCHROME + VGA_COLS * (VGA_ROWS-1); i++)
-                {
-                    *i = *(i + 2*VGA_COLS);
-                }
-                for(; i < (uint16_t *) VGA_VIDEO_MEMORY_MONOCHROME + (VGA_COLS * VGA_ROWS); i++)
-                {
-                    *i = ' ' | (FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLACK) << 8);
-                }
-                break;
+            *i = *(i + vga_width);
+        }
+        for(; i < vga_video_mem + (vga_width * vga_height); i++)
+        {
+            *i = ' ' | (TEXT_COLOR << 8);
         }
     } 
     else 
@@ -78,35 +54,14 @@ static void goOneLineDown(void)
 
 void vga_terminal_putchar(char c)
 {
-    if(currX == VGA_COLS-1 || c == '\n')
+    if(currX == vga_width-1 || c == '\n')
     {
         goOneLineDown();
     }
     
     if(c != '\n')
     {
-        switch (currentVideoType)
-        {
-            case VIDEO_TYPE_NONE:
-            case VIDEO_TYPE_COLOUR:
-                *(((uint16_t *)VGA_VIDEO_MEMORY_COLOR) + currX + currY*VGA_COLS) = c | (FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLUE) << 8);
-                break;
-            case VIDEO_TYPE_MONOCHROME:
-                *(((uint16_t *)VGA_VIDEO_MEMORY_MONOCHROME) + currX + currY*VGA_COLS) = c | (FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLACK) << 8);
-                break;
-        }
+        *(vga_video_mem + currX + currY*vga_width) = c | (TEXT_COLOR << 8);
         currX++;
     }
-}
-
-void vga_terminal_write(const char* data, size_t size)
-{
-    size_t i;
-    for(i = 0; i < size; i++)
-        vga_terminal_putchar(data[i]);
-}
-
-void vga_terminal_writestring(const char* data)
-{
-    vga_terminal_write(data, strlen(data));
 }

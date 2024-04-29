@@ -1,6 +1,7 @@
 #ifndef _KERNEL_TTY_H
 #define _KERNEL_TTY_H
  
+#include <stdint.h>
 #include <stddef.h>
 
 #define VGA_VIDEO_MEMORY_COLOR ((uint8_t *)0xB8000)
@@ -38,10 +39,10 @@ enum video_color
 };
 
 #define FONT_COLOR(FOREGROUND, BACKGROUND) ((uint8_t)((FOREGROUND & 0xF) | ((BACKGROUND & 0x7) << 4)))
+#define TEXT_COLOR FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLACK)
 
-void vga_terminal_initialize(void);
+
+void vga_terminal_initialize(uint16_t *video_mem, uint32_t height, uint32_t width);
 void vga_terminal_putchar(char c);
-void vga_terminal_write(const char* data, size_t size);
-void vga_terminal_writestring(const char* data);
 
 #endif

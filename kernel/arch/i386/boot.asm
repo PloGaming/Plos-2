@@ -59,15 +59,15 @@ multiboot_header:
 	dd	multiboot_header_end - multiboot_header
 	dd -(MAGIC_NUMBER + ARCHITECTURE + (multiboot_header_end - multiboot_header))
 
-;	align 8
-;start_frambuffer_tag:
-;	dw 0x5
-;	dw 0
-;	dd end_framebuffer_tag - start_frambuffer_tag
-;	dd 0
-;	dd 0
-;	dd 0
-;end_framebuffer_tag:
+	align 8
+start_frambuffer_tag:
+	dw 0x5
+	dw 0
+	dd end_framebuffer_tag - start_frambuffer_tag
+	dd 0
+	dd 0
+	dd 0
+end_framebuffer_tag:
 
 	align 8
 	dw 0
