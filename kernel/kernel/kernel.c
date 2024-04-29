@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 #include <graphics/terminal.h>
-#include <graphics/framebuffer.h>
 #include <kernel/multiboot2.h>
 
 void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information) 

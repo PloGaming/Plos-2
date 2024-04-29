@@ -17,7 +17,7 @@ void terminal_initialize(struct multiboot_tag_framebuffer *framebuffer)
             framebuffer_initialize(framebuffer);
             break;
         case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:
-            vga_terminal_initialize(framebuffer->common.framebuffer_addr,
+            vga_terminal_initialize((uint16_t *)(unsigned long)framebuffer->common.framebuffer_addr,
                                     framebuffer->common.framebuffer_height,
                                     framebuffer->common.framebuffer_width);	
             break;
@@ -34,7 +34,7 @@ void terminal_putchar(char c)
             // No one will use this mode ... right??
             break;
         case MULTIBOOT_FRAMEBUFFER_TYPE_RGB:
-            
+            framebuffer_terminal_putchar(c);
             break;
         case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:
             vga_terminal_putchar(c);

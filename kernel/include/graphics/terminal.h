@@ -1,6 +1,8 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
+#include <string.h>
+
 #include <kernel/multiboot2.h>
 #include <graphics/framebuffer.h>
 #include <graphics/vga.h>

@@ -39,7 +39,7 @@ enum video_color
 };
 
 #define FONT_COLOR(FOREGROUND, BACKGROUND) ((uint8_t)((FOREGROUND & 0xF) | ((BACKGROUND & 0x7) << 4)))
-#define TEXT_COLOR FONT_COLOR(VIDEO_COLOR_WHITE, VIDEO_COLOR_BLACK)
+#define TEXT_COLOR FONT_COLOR(VIDEO_COLOR_BLACK, VIDEO_COLOR_WHITE)
 
 
 void vga_terminal_initialize(uint16_t *video_mem, uint32_t height, uint32_t width);

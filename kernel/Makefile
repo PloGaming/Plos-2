@@ -50,6 +50,7 @@ $(KERNEL_OBJS) \
 $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
+graphics/font.o \
 
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .c .S .asm
