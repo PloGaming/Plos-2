@@ -9,7 +9,13 @@
         "vga.h": "c",
         "stdlib.h": "c",
         "stdio.h": "c",
-        "multiboot2.h": "c"
+        "multiboot2.h": "c",
+        "tty.h": "c",
+        "framebuffer.h": "c",
+        "ctype.h": "c",
+        "wctype.h": "c",
+        "wint_t.h": "c",
+        "string.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false
 }

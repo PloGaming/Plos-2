@@ -53,12 +53,23 @@ USER_DATA_ACC 	equ 	(PRESENT << 7) | (USER_DPL << 5) | (NONSYSTEM_DESC << 4) | (
 	section .multiboot
 
 	align 8 ; alignment on 8 bytes (64 bit)
-
 multiboot_header:
 	dd  MAGIC_NUMBER
 	dd	ARCHITECTURE
 	dd	multiboot_header_end - multiboot_header
 	dd -(MAGIC_NUMBER + ARCHITECTURE + (multiboot_header_end - multiboot_header))
+
+;	align 8
+;start_frambuffer_tag:
+;	dw 0x5
+;	dw 0
+;	dd end_framebuffer_tag - start_frambuffer_tag
+;	dd 0
+;	dd 0
+;	dd 0
+;end_framebuffer_tag:
+
+	align 8
 	dw 0
 	dw 0
 	dd 8
@@ -90,6 +101,7 @@ stack_top:
 
 	[BITS 32]
 _start:
+
 	; Here we are in 32-bit x86 protected mode 
 	; --- Interrupts are disabled
 	; --- Paging is disabled
@@ -98,6 +110,11 @@ _start:
 	; Setup stack
 	; Necessary for calling functions
 	mov esp, stack_top
+
+	; EBX contains the base address of the multiboot address
+	push ebx
+	; EAX contains the magic number to validate the GRUB multiboot boot
+	push eax 
 
 	; Crucial CPU configuration
 	; GDT (Global descriptor table)
@@ -129,11 +146,6 @@ _start:
 	; Calling the global contructors
 	extern _init
 	call _init
-
-	; EBX contains the base address of the multiboot address
-	push ebx
-	; EAX contains the magic number to validate the GRUB multiboot boot
-	push eax 
 
 	; Calling the high-level kernel function (writte in C)
 	; The stack is aligned so the call won't have any problems
