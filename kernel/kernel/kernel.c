@@ -4,6 +4,7 @@
 
 #include <graphics/terminal.h>
 #include <kernel/multiboot2.h>
+#include <interrupts/idt.h>
 
 void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information) 
 {
@@ -117,4 +118,6 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 					break;
 			}
 		}
+
+	//initilize_idt();
 }

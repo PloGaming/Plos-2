@@ -18,7 +18,8 @@
         "string.h": "c",
         "terminal.h": "c",
         "random": "c",
-        "ssfn.h": "c"
+        "ssfn.h": "c",
+        "idt.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false
 }
