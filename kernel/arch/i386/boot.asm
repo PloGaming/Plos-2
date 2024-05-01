@@ -121,7 +121,7 @@ _start:
 	; 1) It's necessary to disable interrupts otherwise something bad can happen...
 	cli
 	; 2) Loading the GDTR register with the appropriate structure
-	lgdt [gdtPointer]
+	lgdt [gdtr]
 	; 3) The effects apply on the new load of the segment selectors
 	; 0x08 is the kernel code segment 
 	jmp	0x08:.reload_CS
@@ -203,6 +203,6 @@ gdt:
 endgdt:
 
 ; The GDTR structure
-gdtPointer:
+gdtr:
 	dw	endgdt-gdt-1
 	dd	gdt

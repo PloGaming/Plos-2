@@ -47,7 +47,7 @@ void framebuffer_putpixel(uint32_t x, uint32_t y, uint32_t color)
 
 void framebuffer_terminal_putchar(char c)
 {
-    if(c == '\n' || ssfn_dst.x >= framebuffer.common.framebuffer_width) 
+    if(c == '\n' || (uint32_t)ssfn_dst.x >= framebuffer.common.framebuffer_width) 
     {
         ssfn_dst.y += ssfn_src->height;
         ssfn_dst.x = 5;

@@ -8,7 +8,7 @@ struct idtr_x86 {
     uint32_t base;
 } __attribute__((packed));
 
-struct idt_entry_flags_x86 {
+struct idt_entryFlags_x86 {
     unsigned int gate_type : 4;
     unsigned int zero: 1;
     unsigned int DPL: 2;
@@ -19,12 +19,12 @@ struct idt_entry_x86 {
     uint16_t address_first;
     uint16_t segmentSelector;
     uint8_t reserved;
-    struct idt_entry_flags_x86 entry_flags;
+    struct idt_entryFlags_x86 entry_flags;
     uint16_t address_second;
 } __attribute__((packed));
 
 #define IDT_NUM_ENTRIES 256
 
-void initilize_idt(void);
+void idt_initialize(void);
 
 #endif // IDT_H

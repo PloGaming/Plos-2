@@ -119,5 +119,5 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 			}
 		}
 
-	//initilize_idt();
+	//idt_initialize();
 }
