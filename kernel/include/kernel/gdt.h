@@ -30,8 +30,6 @@ struct gdt_register
     uint32_t address;
 }  __attribute__((packed));
 
-enum flags {
-
-};
+#define KERNEL_CODE_SEGMENT 0x8
 
 #endif // GDT_H

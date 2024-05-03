@@ -1,5 +1,7 @@
+#include <interrupts/idt.h>
+
 __attribute__((noreturn))
-void exception_handler(void)
+void ISR_master_handler(void)
 {
     __asm__ volatile ("cli; hlt");
 }
