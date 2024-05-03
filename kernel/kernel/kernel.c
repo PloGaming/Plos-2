@@ -120,8 +120,8 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 			}
 		}
 
-	idt_table_init();
 	PIC_remap(0x20, 0x28);
 	PIC_disable();
 	
+	idt_table_init();
 }
