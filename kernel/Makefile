@@ -33,6 +33,7 @@ kernel/kernel.o \
 graphics/framebuffer.o \
 graphics/vga.o \
 graphics/terminal.o \
+devices/pit/pit.o \
 
 
 OBJS=\

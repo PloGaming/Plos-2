@@ -5,6 +5,7 @@
 #include <graphics/terminal.h>
 #include <kernel/multiboot2.h>
 #include <interrupts/idt.h>
+#include <devices/pit.h>
 
 void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information) 
 {
@@ -120,4 +121,7 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 		}
 
 	idt_table_init();
+	PIC_remap(0x20, 0x28);
+	PIC_disable();
+	
 }

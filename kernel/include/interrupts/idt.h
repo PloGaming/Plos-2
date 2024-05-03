@@ -37,12 +37,24 @@ typedef enum
 
 #define IDT_NUM_ENTRIES 256
 
-void idt_table_init();
-void idt_table_set_gate(int interrupt, void *address, uint16_t segment_descriptor, uint8_t flags);
+struct regs
+{
+    unsigned int gs, fs, es, ds;      /* pushed the segs last */
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;  /* pushed by 'pusha' */
+    unsigned int int_no, err_code;    /* our 'push byte #' and ecodes do this */
+    unsigned int eip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */ 
+} __attribute__((packed));
+
+void idt_table_init(void);
+void idt_table_set_gate(int interrupt, void *address, uint8_t flags);
 void idt_enable_gate(int interrupt);
 void idt_disable_gate(int interrupt);
 
+void isr_install(void);
+
 __attribute__((noreturn))
-void ISR_master_handler(void);
+void ISR_master_handler(struct regs *registers);
+
+typedef void (*ISRHandler)(struct regs *reg);
 
 #endif // IDT_H

@@ -200,6 +200,7 @@ gdt:
 	db 	USER_DATA_ACC
 	db	((USER_LIMIT >> 16) & 0xf) | (GDT_FLAG << 4)
 	db  (USER_BASE >> 24) & 0xff
+	; Tss 
 endgdt:
 
 ; The GDTR structure

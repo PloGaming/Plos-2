@@ -20,7 +20,10 @@
         "random": "c",
         "ssfn.h": "c",
         "idt.h": "c",
-        "gdt.h": "c"
+        "gdt.h": "c",
+        "*.tcc": "c",
+        "utility.h": "c",
+        "pit.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false
 }
