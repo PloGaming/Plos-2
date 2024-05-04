@@ -6,6 +6,7 @@
 #include <kernel/multiboot2.h>
 #include <interrupts/idt.h>
 #include <devices/pit.h>
+#include <kernel/utility.h>
 
 void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information) 
 {
@@ -13,7 +14,7 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 	if (magicNumber != MULTIBOOT2_BOOTLOADER_MAGIC)
     {
 		printf ("[ERROR] Invalid magic number: 0x%x\n", (uint32_t) magicNumber);
-		return;
+		kernel_panic(INVALID_MAGIC_NUMBER);
     }
 
 	// Initialize the VGA output
@@ -122,6 +123,6 @@ void kernel_main(uint32_t magicNumber, struct multiboot_tag *boot_information)
 
 	PIC_remap(0x20, 0x28);
 	PIC_disable();
-	
+
 	idt_table_init();
 }

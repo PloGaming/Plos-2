@@ -97,7 +97,8 @@ stack_top:
 ; Obviously this function does not return.
 	section .text
 
-	global _start:function (_start.end - _start )
+	global _start:function (end - _start )
+	global panic
 
 	[BITS 32]
 _start:
@@ -156,6 +157,7 @@ _start:
 	extern _fini
 	call _fini
 
+panic:
 	; After the return we put the CPU in an infinite loop
 	; 1) Disable interrupts
 	cli ; Clear interrupt flag
@@ -164,7 +166,7 @@ _start:
 	; 3) Jump to halt again (only happens if the CPU wakes up due to a non-maskable interrupt)
 	jmp .a
 
-.end:
+end:
 
 ; Start of .rodata section
 	section .rodata

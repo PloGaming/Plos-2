@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 static inline void outb(uint16_t port, uint8_t val)
 {
@@ -21,6 +22,20 @@ static inline uint8_t inb(uint16_t port)
 static inline void io_wait(void)
 {
     outb(0x80, 0);
+}
+
+__attribute__((noreturn))
+extern void panic();
+
+enum errors {
+    INVALID_MAGIC_NUMBER,
+};
+
+__attribute__((noreturn))
+static void kernel_panic(int error)
+{
+    printf("[ERROR] kernel panic: %d\n", error);
+    panic();
 }
 
 #endif // UTILITY_H
